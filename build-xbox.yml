@@ -1,0 +1,112 @@
+name: Build Xbox OT-FM MSIX Package
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-xbox-msix:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+
+      - name: Setup MSBuild (Visual Studio 2022)
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Generate Placeholder Store/Tile PNG Assets
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Drawing
+          $assetsDir = "xbox-uwp\Assets"
+          New-Item -ItemType Directory -Force -Path $assetsDir | Out-Null
+          $specs = @{
+            "StoreLogo.png" = @(50, 50)
+            "Square44x44Logo.png" = @(44, 44)
+            "Square150x150Logo.png" = @(150, 150)
+            "Wide310x150Logo.png" = @(310, 150)
+            "SplashScreen.png" = @(620, 300)
+          }
+          foreach ($name in $specs.Keys) {
+            $w, $h = $specs[$name]
+            $bmp = New-Object System.Drawing.Bitmap($w, $h)
+            $g = [System.Drawing.Graphics]::FromImage($bmp)
+            $g.Clear([System.Drawing.Color]::FromArgb(11, 15, 20))
+            $brush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(34, 197, 94))
+            $g.FillRectangle($brush, [int]($w * 0.25), [int]($h * 0.25), [int]($w * 0.5), [int]($h * 0.5))
+            $bmp.Save((Join-Path $assetsDir $name), [System.Drawing.Imaging.ImageFormat]::Png)
+            $g.Dispose()
+            $bmp.Dispose()
+          }
+
+      - name: Precompile FMCompute.hlsl GPU Training Shaders
+        shell: pwsh
+        run: |
+          $sdkBin = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\10.0.*" -Directory | Sort-Object Name -Descending | Select-Object -First 1
+          $fxc = Join-Path $sdkBin.FullName "x64\fxc.exe"
+          New-Item -ItemType Directory -Force -Path "xbox-uwp\Shaders" | Out-Null
+          $entries = @("CSEncodeSineOperators", "CSConvForward", "CSAddResidual", "CSMSELossGrad", "CSConvBackwardInput", "CSSiLUBackward", "CSConvBackwardWeights", "CSAdamUpdate")
+          foreach ($entry in $entries) {
+            & $fxc /nologo /T cs_5_1 /E $entry /Fo "xbox-uwp\Shaders\$entry.cso" "xbox-uwp\src\Shaders\FMCompute.hlsl"
+          }
+
+      - name: Create Self-Signed Test Certificate for Xbox Dev Mode
+        shell: pwsh
+        run: |
+          $cert = New-SelfSignedCertificate `
+            -Type Custom `
+            -Subject "CN=XboxOTFMDev" `
+            -KeyUsage DigitalSignature `
+            -FriendlyName "Xbox OT-FM Dev Signing Cert" `
+            -CertStoreLocation "Cert:\CurrentUser\My" `
+            -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
+          $pwd = ConvertTo-SecureString -String "XboxOTFM2026!" -Force -AsPlainText
+          New-Item -ItemType Directory -Force -Path "dist-xbox" | Out-Null
+          Export-PfxCertificate -Cert $cert -FilePath "xbox-uwp\XboxOTFM_Cert.pfx" -Password $pwd | Out-Null
+          Export-Certificate -Cert $cert -FilePath "dist-xbox\XboxOTFM_Cert.cer" | Out-Null
+
+      - name: Restore DirectML & CppWinRT NuGet Packages
+        run: nuget restore xbox-uwp\XboxOTFM.sln -PackagesDirectory xbox-uwp\packages
+
+      - name: Build & Package Signed MSIX (Release|x64)
+        shell: pwsh
+        run: |
+          msbuild xbox-uwp\XboxOTFM.sln `
+            /p:Configuration=Release `
+            /p:Platform=x64 `
+            /p:AppxBundle=Never `
+            /p:UapAppxPackageBuildMode=StoreUpload `
+            /p:AppxPackageExtension=.msix `
+            /p:PackageCertificateKeyFile=XboxOTFM_Cert.pfx `
+            /p:PackageCertificatePassword=XboxOTFM2026! `
+            /p:OutDir=..\build-out\ `
+            /m
+
+      - name: Locate & Sign MSIX + Collect Dependencies
+        shell: pwsh
+        run: |
+          $sdkBin = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\10.0.*" -Directory | Sort-Object Name -Descending | Select-Object -First 1
+          $signtool = Join-Path $sdkBin.FullName "x64\signtool.exe"
+          $msixFiles = Get-ChildItem -Path "xbox-uwp","build-out" -Recurse -Include *.msix,*.appx
+          foreach ($pkg in $msixFiles) {
+            Copy-Item $pkg.FullName -Destination "dist-xbox\" -Force
+            & $signtool sign /fd SHA256 /f "xbox-uwp\XboxOTFM_Cert.pfx" /p "XboxOTFM2026!" (Join-Path "dist-xbox" $pkg.Name)
+          }
+          $deps = Get-ChildItem -Path "xbox-uwp\packages" -Recurse -Include DirectML.dll
+          foreach ($d in $deps) {
+            Copy-Item $d.FullName -Destination "dist-xbox\" -Force
+          }
+
+      - name: Upload Xbox MSIX Bundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Xbox-OTFM-MSIX-Release-x64
+          path: dist-xbox/
+          if-no-files-found: warn

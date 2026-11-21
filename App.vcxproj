@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.props')" />
+  <Import Project="packages\Microsoft.AI.DirectML.1.15.2\build\native\Microsoft.AI.DirectML.props" Condition="Exists('packages\Microsoft.AI.DirectML.1.15.2\build\native\Microsoft.AI.DirectML.props')" />
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7A4C3E92-8D11-4F2B-9A61-3B7D92C51E10}</ProjectGuid>
+    <Keyword>DirectXApp</Keyword>
+    <RootNamespace>XboxOTFM</RootNamespace>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <MinimumVisualStudioVersion>16.0</MinimumVisualStudioVersion>
+    <AppContainerApplication>true</AppContainerApplication>
+    <ApplicationType>Windows Store</ApplicationType>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformMinVersion>10.0.19041.0</WindowsTargetPlatformMinVersion>
+    <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
+    <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
+    <AppxPackageExtension>.msix</AppxPackageExtension>
+    <GenerateAppInstallerFile>false</GenerateAppInstallerFile>
+    <AppxBundle>Never</AppxBundle>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ConformanceMode>true</ConformanceMode>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>_DEBUG;WINAPI_FAMILY=WINAPI_FAMILY_APP;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+      <AdditionalDependencies>d3d12.lib;d3d11.lib;d2d1.lib;dwrite.lib;dxgi.lib;ws2_32.lib;iphlpapi.lib;windowscodecs.lib;xinputuap.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ConformanceMode>true</ConformanceMode>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;WINAPI_FAMILY=WINAPI_FAMILY_APP;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>d3d12.lib;d3d11.lib;d2d1.lib;dwrite.lib;dxgi.lib;ws2_32.lib;iphlpapi.lib;windowscodecs.lib;xinputuap.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\OptimalTransport.h" />
+    <ClInclude Include="src\FMBrain.h" />
+    <ClInclude Include="src\Trainer.h" />
+    <ClInclude Include="src\GamepadUI.h" />
+    <ClInclude Include="src\WebBridge.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\OptimalTransport.cpp" />
+    <ClCompile Include="src\FMBrain.cpp" />
+    <ClCompile Include="src\Trainer.cpp" />
+    <ClCompile Include="src\GamepadUI.cpp" />
+    <ClCompile Include="src\WebBridge.cpp" />
+    <ClCompile Include="src\Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Shaders\FMCompute.hlsl" />
+    <Content Include="Shaders\CSEncodeSineOperators.cso"><DeploymentContent>true</DeploymentContent></Content>
+    <Content Include="Shaders\CSConvForward.cso"><DeploymentContent>true</DeploymentContent></Content>
+    <Content Include="Shaders\CSAddResidual.cso"><DeploymentContent>true</DeploymentContent></Content>
+    <Content Include="Shaders\CSMSELossGrad.cso"><DeploymentContent>true</DeploymentContent></Content>
+    <Content Include="Shaders\CSConvBackwardInput.cso"><DeploymentContent>true</DeploymentContent></Content>
+    <Content Include="Shaders\CSSiLUBackward.cso"><DeploymentContent>true</DeploymentContent></Content>
+    <Content Include="Shaders\CSConvBackwardWeights.cso"><DeploymentContent>true</DeploymentContent></Content>
+    <Content Include="Shaders\CSAdamUpdate.cso"><DeploymentContent>true</DeploymentContent></Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\StoreLogo.png"><DeploymentContent>true</DeploymentContent></Image>
+    <Image Include="Assets\Square44x44Logo.png"><DeploymentContent>true</DeploymentContent></Image>
+    <Image Include="Assets\Square150x150Logo.png"><DeploymentContent>true</DeploymentContent></Image>
+    <Image Include="Assets\Wide310x150Logo.png"><DeploymentContent>true</DeploymentContent></Image>
+    <Image Include="Assets\SplashScreen.png"><DeploymentContent>true</DeploymentContent></Image>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Target Name="CompileFMComputeShaders" BeforeTargets="ClCompile" Condition="!Exists('$(ProjectDir)Shaders\CSEncodeSineOperators.cso') Or !Exists('$(ProjectDir)Shaders\CSAddResidual.cso') Or !Exists('$(ProjectDir)Shaders\CSSiLUBackward.cso')">
+    <MakeDir Directories="$(ProjectDir)Shaders" />
+    <Exec Command="&quot;$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\fxc.exe&quot; /nologo /T cs_5_1 /E CSEncodeSineOperators /Fo &quot;$(ProjectDir)Shaders\CSEncodeSineOperators.cso&quot; &quot;$(ProjectDir)src\Shaders\FMCompute.hlsl&quot;" Condition="!Exists('$(ProjectDir)Shaders\CSEncodeSineOperators.cso')" />
+    <Exec Command="&quot;$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\fxc.exe&quot; /nologo /T cs_5_1 /E CSConvForward /Fo &quot;$(ProjectDir)Shaders\CSConvForward.cso&quot; &quot;$(ProjectDir)src\Shaders\FMCompute.hlsl&quot;" Condition="!Exists('$(ProjectDir)Shaders\CSConvForward.cso')" />
+    <Exec Command="&quot;$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\fxc.exe&quot; /nologo /T cs_5_1 /E CSAddResidual /Fo &quot;$(ProjectDir)Shaders\CSAddResidual.cso&quot; &quot;$(ProjectDir)src\Shaders\FMCompute.hlsl&quot;" Condition="!Exists('$(ProjectDir)Shaders\CSAddResidual.cso')" />
+    <Exec Command="&quot;$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\fxc.exe&quot; /nologo /T cs_5_1 /E CSMSELossGrad /Fo &quot;$(ProjectDir)Shaders\CSMSELossGrad.cso&quot; &quot;$(ProjectDir)src\Shaders\FMCompute.hlsl&quot;" Condition="!Exists('$(ProjectDir)Shaders\CSMSELossGrad.cso')" />
+    <Exec Command="&quot;$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\fxc.exe&quot; /nologo /T cs_5_1 /E CSConvBackwardInput /Fo &quot;$(ProjectDir)Shaders\CSConvBackwardInput.cso&quot; &quot;$(ProjectDir)src\Shaders\FMCompute.hlsl&quot;" Condition="!Exists('$(ProjectDir)Shaders\CSConvBackwardInput.cso')" />
+    <Exec Command="&quot;$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\fxc.exe&quot; /nologo /T cs_5_1 /E CSSiLUBackward /Fo &quot;$(ProjectDir)Shaders\CSSiLUBackward.cso&quot; &quot;$(ProjectDir)src\Shaders\FMCompute.hlsl&quot;" Condition="!Exists('$(ProjectDir)Shaders\CSSiLUBackward.cso')" />
+    <Exec Command="&quot;$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\fxc.exe&quot; /nologo /T cs_5_1 /E CSConvBackwardWeights /Fo &quot;$(ProjectDir)Shaders\CSConvBackwardWeights.cso&quot; &quot;$(ProjectDir)src\Shaders\FMCompute.hlsl&quot;" Condition="!Exists('$(ProjectDir)Shaders\CSConvBackwardWeights.cso')" />
+    <Exec Command="&quot;$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\fxc.exe&quot; /nologo /T cs_5_1 /E CSAdamUpdate /Fo &quot;$(ProjectDir)Shaders\CSAdamUpdate.cso&quot; &quot;$(ProjectDir)src\Shaders\FMCompute.hlsl&quot;" Condition="!Exists('$(ProjectDir)Shaders\CSAdamUpdate.cso')" />
+  </Target>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('packages\Microsoft.Windows.CppWinRT.2.0.240405.15\build\native\Microsoft.Windows.CppWinRT.targets')" />
+  <Import Project="packages\Microsoft.AI.DirectML.1.15.2\build\native\Microsoft.AI.DirectML.targets" Condition="Exists('packages\Microsoft.AI.DirectML.1.15.2\build\native\Microsoft.AI.DirectML.targets')" />
+</Project>
